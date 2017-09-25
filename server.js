@@ -1,4 +1,7 @@
 const net = require('net');
+const nessString='QA';
+const clshutdown='DEC';
+const claccepted='ACK';
 const port = 8124;
 
 const server = net.createServer((client) => {
@@ -6,12 +9,21 @@ const server = net.createServer((client) => {
 
     client.setEncoding('utf8');
 
-    client.on('data', (data) => {
-        console.log(data);
-        client.write('\r\nHello!\r\nRegards,\r\nServer\r\n');
+    client.on('data', (data,err)=> {
+        if(err){console.log(err.message.toString());}
+         else if (data.toString()===nessString.toString()){
+            console.log(data);
+            client.id = Date.now();
+            console.log(claccepted+`,client №`+client.id+` accepted`);
+           client.write(claccepted);
+        }
+        else if(data.toString()!==nessString.toString()){
+console.log(clshutdown+`, client №`+client.id+` sent wrong line`);
+            client.write(clshutdown);
+        }
     });
 
-    client.on('end', () => console.log('Client disconnected'));
+    client.on(`end`, () => console.log(`Client №`+client.id+` disconnected`));
 });
 
 server.listen(port, () => {
